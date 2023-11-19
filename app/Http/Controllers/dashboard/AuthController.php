@@ -8,23 +8,27 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\User;
 use App\Traits\UploadBese64Image;
-use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\PersonalAccessToken;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 
 class AuthController extends Controller
 {
+    //traits
     use UploadBese64Image;
 
     public function __construct() {
-        $this->middleware(['auth:sanctum'], ['only' => ['logout','updatePassword','createCustomer','updateCustomer']]);
+        $this->middleware(['auth:sanctum'],['only' =>
+            ['logout',
+            'updatePassword',
+            'createCustomer',
+            'updateCustomer',
+            'viewCustomer',
+            'listing']
+            ]);
     }
 
     function login(LoginRequest $request) {
