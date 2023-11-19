@@ -34,14 +34,19 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-protected function image(): Attribute
-{
-    return Attribute::make(
-        get: function ($value) {
-            // If $value is null, return null
-            return $value ? asset('images/users/' . $value) : null;
-        }
-    );
-}
+    public static function getCustomerById($customerId)
+    {
+        return self::where('id',$customerId)->where('is_admin',0)->first();
+    }
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                // If $value is null, return null
+                return $value ? asset('images/users/' . $value) : null;
+            }
+        );
+    }
 
 }

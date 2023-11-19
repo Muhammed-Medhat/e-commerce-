@@ -25,5 +25,6 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout');
     Route::post('add-customer', 'createCustomer');
     Route::post('update-customer/{id}', 'updateCustomer');
-    Route::delete('delete-customer/{id}', 'deleteCustomer');
+    Route::get('customers', 'listing');
+    Route::get('view-customer/{id}', 'viewCustomer');
 });

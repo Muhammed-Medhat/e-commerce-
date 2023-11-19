@@ -210,4 +210,31 @@ class AuthController extends Controller
         }
     }
 
+    function listing() {
+        try {
+            $customers= User::where('is_admin',0)->paginate();
+            return response()->json(['data'=>$customers,'status'=>true]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    function viewCustomer($id) {
+        try {
+            $customer = User::getCustomerById($id);
+            if (!$customer) {
+                return response()->json(['message'=>'something wrong','status'=>false]);
+            }
+            return response()->json(['data'=>$customer,'status'=>true]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
 }
