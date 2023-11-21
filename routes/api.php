@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\dashboard\AuthController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\dashboard\CustomerController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,11 +16,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 ###### auth admin #####
-Route::controller(AuthController::class)->group(function () {
+Route::prefix('admin')->controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
     Route::post('logout', 'logout');
-    Route::post('add-customer', 'createCustomer');
-    Route::post('update-customer/{id}', 'updateCustomer');
-    Route::get('customers', 'listing');
-    Route::get('view-customer/{id}', 'viewCustomer');
+    Route::post('update-password', 'updatePassword');
+});
+
+Route::prefix('customers')->middleware(['auth:sanctum'])->group(function () {
+    Route::post('add-customer', [CustomerController::class, 'createCustomer']);
+    Route::post('update-customer/{id}', [CustomerController::class, 'updateCustomer']);
+    Route::get('customers', [CustomerController::class, 'listing']);
+    Route::get('view-customer/{id}', [CustomerController::class, 'viewCustomer']);
+    Route::get('delete-customer/{id}', [CustomerController::class, 'deleteCustomer']);
 });
