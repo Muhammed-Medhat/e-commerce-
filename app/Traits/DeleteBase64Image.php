@@ -5,9 +5,9 @@ namespace App\Traits;
 use Illuminate\Support\Facades\File;
 
 
-trait DeleteBaser64Image
+trait DeleteBase64Image
 {
-    public function DeleteBaser64Image($image, $folder)
+    public function DeleteBase64Image($image, $folder)
     {
                 if (!empty($image)) {
                     #create a path image 

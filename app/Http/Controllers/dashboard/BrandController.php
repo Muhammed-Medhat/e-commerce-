@@ -7,7 +7,7 @@ use App\Http\Requests\CreateBrandRequest;
 use App\Http\Requests\UpdateBrandRequest;
 use App\Models\Brand;
 use Illuminate\Http\Request;
-use App\Traits\DeleteBaser64Image;
+use App\Traits\DeleteBase64Image;
 use App\Traits\UploadBese64Image;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
@@ -17,25 +17,25 @@ class BrandController extends Controller
 {
     //traits
     use UploadBese64Image; # store image
-    use DeleteBaser64Image; # delete image
+    use DeleteBase64Image; # delete image
 
     function createBrand(CreateBrandRequest $request) {
         try {
             #get validation data requests
             $validation_data = $request->validated();
-            #check if i have image key in request
+            #check if i have logo key in request
             if (array_key_exists('logo', $validation_data)) {
-                #store path image in foleder and save image in DB
+                #store path logo in foleder and save image in DB
                 $validation_data['logo'] = $this->UploadBese64Image($validation_data['logo'],'brand');
             } else {
-                #set image column in DB as null
+                #set logo column in DB as null
                     $validation_data['logo'] = null;
                 }
 
-            #create user =>
-            $user = Brand::create($validation_data);
+            #create brand =>
+            $brand = Brand::create($validation_data);
 
-            return response()->json(['data'=>$user, 'status'=>true]);
+            return response()->json(['data'=>$brand, 'status'=>true]);
 
         } catch (\Throwable $th) {
             return response()->json([
@@ -60,17 +60,17 @@ class BrandController extends Controller
                 #check if i have a value in logo Or NOT 
                 if ($validation_data['logo'] !== null) {
                     ## delete old logo ##
-                    $logo = $brand->getRawOriginal('image'); // Get Original name of logo without path 
-                    $this->DeleteBaser64Image($logo,'brand'); // Delete LOGO in folder brands
+                    $logo = $brand->getRawOriginal('logo'); // Get Original name of logo without path 
+                    $this->DeleteBase64Image($logo,'brand'); // Delete LOGO in folder brand
 
                     ## insert new logo in DB & insert new logo in folder Brand ##
                     $validation_data['logo'] = $this->UploadBese64Image($validation_data['logo'],'brand');
 
                 } else { // A value of logo key is Null thats mian delete logo from brand folder and DB
                     # Get Original name of logo without path 
-                    $image = $brand->getRawOriginal('logo'); 
-                    ## delete image ##
-                    $this->DeleteBaser64Image($image,'brand');
+                    $logo = $brand->getRawOriginal('logo'); 
+                    ## delete logo ##
+                    $this->DeleteBase64Image($logo,'brand');
                 }
             }
             #check if i have website_link key in request & = null
@@ -100,13 +100,13 @@ class BrandController extends Controller
         try {
             #get brand by ID & Make sure it's a customer
             $brand = Brand::find($id);
-            #check if brand nof found in DB or NOT
+            #check if brand not found in DB or NOT
             if (!$brand) {
                 return response()->json(['message'=>'somthing wrong', 'status'=>false],404);
             } else {
                     ## delete logo ##
                     $logo = $brand->getRawOriginal('logo'); // Get Original name of logo without path 
-                    $this->DeleteBaser64Image($logo,'brand'); // Delete LOGO in folder brand
+                    $this->DeleteBase64Image($logo,'brand'); // Delete LOGO in folder brand
                     $brand->delete(); // delete brand in DB
                 return response()->json(['message'=>"brand has been deleted",'status'=>true]);
             }

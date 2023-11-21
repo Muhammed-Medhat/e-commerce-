@@ -3,45 +3,43 @@
 namespace App\Http\Controllers\dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateCustomerRequest;
-use App\Http\Requests\UpdateCustomerRequest;
-use App\Models\User;
+use App\Http\Requests\CreateCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
+use App\Models\Category;
 use App\Traits\DeleteBase64Image;
 use App\Traits\UploadBese64Image;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
-class CustomerController extends Controller
+class CategoryController extends Controller
 {
         //traits
-        use UploadBese64Image; # store image
-        use DeleteBase64Image; # delete image
+    use UploadBese64Image; # store image
+    use DeleteBase64Image; # delete image
 
-
-    function createCustomer(CreateCustomerRequest $request) {
+    function createCategory(CreateCategoryRequest $request) {
         try {
             #get validation data requests
             $validation_data = $request->validated();
-            # set user as a customer auto
-            $validation_data['is_admin'] = 0;
-            # hashing password
-            $validation_data['password'] = Hash::make($validation_data['password']);
             #check if i have image key in request
             if (array_key_exists('image', $validation_data)) {
                 #store path image in foleder and save image in DB
-                $validation_data['image'] = $this->UploadBese64Image($validation_data['image'],'users');
+                $validation_data['image'] = $this->UploadBese64Image($validation_data['image'],'category');
             } else {
                 #set image column in DB as null
                     $validation_data['image'] = null;
                 }
 
-            #create user =>
-            $user = User::create($validation_data);
+            #create slug by name
+            $validation_data['slug'] = Str::slug($validation_data['name']);
 
-            return response()->json(['data'=>$user, 'status'=>true]);
+            #create category
+            $category = Category::create($validation_data);
+
+            return response()->json(['data'=>$category, 'status'=>true]);
 
         } catch (\Throwable $th) {
             return response()->json([
@@ -51,45 +49,47 @@ class CustomerController extends Controller
         }
     }
 
-    function updateCustomer(UpdateCustomerRequest $request, $id) {
+    function updateCategory(UpdateCategoryRequest $request, $id) {
         try {
-            #get user by ID
-            $user = User::find($id);
-            #check if user nof found in DB
-            if (!$user) {
-                return response()->json(['message'=>'user not found', 'status'=>false],404);
+            #get category by ID
+            $category = Category::find($id);
+            #check if brand nof found in DB
+            if (!$category) {
+                return response()->json(['message'=>'category not found', 'status'=>false],404);
             }
             #get validation data requests => 
             $validation_data = $request->validated();
-            # set user as a customer auto
-            $validation_data['is_admin'] = 0;
-            #check if i have password key in request
-            if (array_key_exists('password', $validation_data)) {
-                # hashing password
-                $validation_data['password'] = Hash::make($validation_data['password']);
-            }
             #check if i have image key in request
             if (array_key_exists('image', $validation_data)) {
                 #check if i have a value in image Or NOT 
                 if ($validation_data['image'] !== null) {
                     ## delete old image ##
-                    $image = $user->getRawOriginal('image'); // Get Original name of image without path 
-                    $this->DeleteBase64Image($image,'users'); // Delete IMAGE in folder users
+                    $image = $category->getRawOriginal('image'); // Get Original name of image without path 
+                    $this->DeleteBase64Image($image,'category'); // Delete IMAGE in folder category
 
-                    ## insert new image in DB & insert new image in folder users ##
-                    $validation_data['image'] = $this->UploadBese64Image($validation_data['image'],'users');
+                    ## insert new image in DB & insert new image in folder Category ##
+                    $validation_data['image'] = $this->UploadBese64Image($validation_data['image'],'category');
 
-                } else { // A value of image key is Null thats mian delete image from image folder and DB
+                } else { // A value of image key is Null thats mian delete image from category folder and DB //
                     # Get Original name of image without path 
-                    $image = $user->getRawOriginal('image'); 
+                    $image = $category->getRawOriginal('image'); 
                     ## delete image ##
-                    $this->DeleteBase64Image($image,'users');
+                    $this->DeleteBase64Image($image,'category');
                 }
             }
-            #update user =>
-            $user->update($validation_data);
+            #check if i have parent_category key in request & = null
+            if (array_key_exists('parent_category', $validation_data) && $validation_data['parent_category'] == null) {
+                    $validation_data['parent_category'] = null;
+            }
+            #check if i have neme key in request to create slug & = null
+            if (array_key_exists('name', $validation_data) && $validation_data['name'] == null) {
+                    $validation_data['slug'] = Str::slug($validation_data['name']);
+            }
 
-            return response()->json(['data'=>$user, 'status'=>true]);
+            #update category
+            $category->update($validation_data);
+
+            return response()->json(['data'=>$category, 'status'=>true]);
             
         } catch (\Throwable $th) {
             return response()->json([
@@ -99,20 +99,20 @@ class CustomerController extends Controller
         }
     }
 
-    function deleteCustomer($id) {
-        
+    function deleteCategory($id) {
+
         try {
-            #get user by ID & Make sure it's a customer
-            $customer = User::where('id',$id)->where('is_admin',0)->first();
-            #check if user not found in DB or NOT
-            if (!$customer) {
+            #get category by ID & Make sure it's a customer
+            $category = Category::find($id);
+            #check if category nof found in DB or NOT
+            if (!$category) {
                 return response()->json(['message'=>'somthing wrong', 'status'=>false],404);
             } else {
                     ## delete image ##
-                    $image = $customer->getRawOriginal('image'); // Get Original name of image without path 
-                    $this->DeleteBase64Image($image,'users'); // Delete IMAGE in folder users
-                    $customer->delete(); // delete customer in DB
-                return response()->json(['message'=>"customer has been deleted",'status'=>true]);
+                    $image = $category->getRawOriginal('image'); // Get Original name of image without path 
+                    $this->DeleteBase64Image($image,'category'); // Delete IMAGE in folder brand
+                    $category->delete(); // delete brand in DB
+                return response()->json(['message'=>"category has been deleted",'status'=>true]);
             }
         } catch (\Throwable $th) {
             return response()->json([
@@ -122,7 +122,7 @@ class CustomerController extends Controller
         }
     }
 
-    //get all users customers and admins
+
     function listing(Request $request) {
         try {
 
@@ -130,8 +130,8 @@ class CustomerController extends Controller
             $validator = Validator::make($request->all(), [
                 'q'=>['string'],
                 'sort_by' => [Rule::in(["a-z","z-a","old","new"])],
+                'with_parent' => [Rule::in([0, 1])],
                 'filter_by_date_range' => ['json'],
-                'is_admin'=>[Rule::in([0, 1])],
             ]);
 
             // valid error message
@@ -143,18 +143,13 @@ class CustomerController extends Controller
                 ], 422);
             }
             #Preparation query
-            $customers = User::query();
+            $categories = Category::query();
             //////////////////////////// start filters //////////////////////////////////////////////
-
-            /*admin or customer filter */
-            if ($request->has('is_admin')) {
-                $request->is_admin == 1 ? $customers->where('is_admin',1) : $customers->where('is_admin',0);
-            }
 
             /* Filter by data range */
             if(isset($request->filter_by_date_range)){
                 $filter_by_date_range = json_decode($request->filter_by_date_range);
-                $customers->whereBetween('created_at', [
+                $categories->whereBetween('created_at', [
                     Carbon::parse($filter_by_date_range[0])->format('Y-m-d\TH:i:s.u\Z'),
                     Carbon::parse($filter_by_date_range[1])->format('Y-m-d\TH:i:s.u\Z'),
                 ]);
@@ -162,32 +157,37 @@ class CustomerController extends Controller
             /* Filter by search */
             if(isset($request->q)){
                 $query = $request->q;
-                $customers
+                $categories
                 ->where('name', 'like', "%{$query}%");
             }
     
             /* Sort asc */
             if(isset($request->sort_by) && $request->sort_by == "a-z"){
-                $customers->orderBy("id","asc");
+                $categories->orderBy("id","asc");
             }
     
             /* Sort desc */
             if(isset($request->sort_by) && $request->sort_by == "z-a"){
-                $customers->orderBy("id","desc");
+                $categories->orderBy("id","desc");
             }
     
             /* Filter by date old */
             if(isset($request->sort_by) && $request->sort_by == "old"){
-                $customers->orderBy("created_at","asc");
+                $categories->orderBy("created_at","asc");
             }
         
             /* Filter by date new */
             if(isset($request->sort_by) && $request->sort_by == "new"){
-                $customers->orderBy("created_at","desc");
+                $categories->orderBy("created_at","desc");
+            }
+        
+            /* Filter by with_parent_category */
+            if(isset($request->with_parent) && $request->with_parent == 1){
+                $categories->with(['parent']);
             }
             //////////////////////////// end filters //////////////////////////////////////////////
 
-            return response()->json(['data'=>$customers->paginate(), 'status'=>true]);
+            return response()->json(['data'=>$categories->paginate(), 'status'=>true]);
 
         } catch (\Throwable $th) {
             return response()->json([
@@ -197,15 +197,15 @@ class CustomerController extends Controller
         }
     }
 
-    function viewCustomer($id) {
+    function viewCategory($id) {
         try {
-            #get user by ID & Make sure it's a customer
-            $customer = User::where('id',$id)->where('is_admin',0)->first();
-            #check if user nof found in DB
-            if (!$customer) {
+            #get category by ID
+            $category = Category::with(['parent'])->find($id);
+            #check if category not found in DB
+            if (!$category) {
                 return response()->json(['message'=>'something wrong','status'=>false],404);
             }
-            return response()->json(['data'=>$customer,'status'=>true]);
+            return response()->json(['data'=>$category,'status'=>true]);
 
         } catch (\Throwable $th) {
             return response()->json([
