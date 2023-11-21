@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\dashboard\AuthController;
+use App\Http\Controllers\dashboard\BrandController;
 use App\Http\Controllers\dashboard\CustomerController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,4 +29,12 @@ Route::prefix('customers')->middleware(['auth:sanctum'])->group(function () {
     Route::get('customers', [CustomerController::class, 'listing']);
     Route::get('view-customer/{id}', [CustomerController::class, 'viewCustomer']);
     Route::get('delete-customer/{id}', [CustomerController::class, 'deleteCustomer']);
+});
+
+Route::prefix('brands')->middleware(['auth:sanctum'])->group(function () {
+    Route::post('add-brand', [BrandController::class, 'createBrand']);
+    Route::post('update-brand/{id}', [BrandController::class, 'updateBrand']);
+    Route::get('brands', [BrandController::class, 'listing']);
+    Route::get('view-brand/{id}', [BrandController::class, 'viewBrand']);
+    Route::get('delete-brand/{id}', [BrandController::class, 'deleteBrand']);
 });

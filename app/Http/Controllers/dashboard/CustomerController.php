@@ -79,7 +79,7 @@ class CustomerController extends Controller
                     ## insert new image in DB & insert new image in folder users ##
                     $validation_data['image'] = $this->UploadBese64Image($validation_data['image'],'users');
 
-                } else { // A value of image key is Null thats mian delete image from image and DB
+                } else { // A value of image key is Null thats mian delete image from image folder and DB
                     # Get Original name of image without path 
                     $image = $user->getRawOriginal('image'); 
                     ## delete image ##
