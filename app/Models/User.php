@@ -34,10 +34,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public static function getCustomerById($customerId)
-    {
-        return self::where('id',$customerId)->where('is_admin',0)->first();
-    }
+    // public static function getCustomerById($customerId)
+    // {
+    //     return self::where('id',$customerId)->where('is_admin',0)->first();
+    // }
 
     protected function image(): Attribute
     {

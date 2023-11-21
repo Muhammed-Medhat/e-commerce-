@@ -23,18 +23,18 @@ class AuthController extends Controller
 
     function login(LoginRequest $request) {
         try {
-            #check email & password =>
+            #check email & password
             if (!Auth::attempt($request->only(['email', 'password']), $request->has('remember_me'))) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Email & Password does not match with our record.',
                 ], 401);
             }
-            #get validation data requests => 
+            #get validation data requests
             $validation_data = $request->validated();
-            # get admin =>
+            # get admin
             $admin = User::where('email',$validation_data['email'])->first();
-            #check id admin or not =>
+            #check id admin or not
             if ($admin->is_admin !== 1) {
                 return response()->json(['message'=>'somthing else' , 'status'=>false]);
             }
@@ -42,9 +42,8 @@ class AuthController extends Controller
             return response()->json([
                 'data'=>$admin,
                 'token_expired' => config('sanctum.expiration'). ' minute',
-                'token' => $admin->createToken("API TOKEN")->plainTextToken,
-                'status'=>true])
-                ;
+                'token' => $admin->createToken("API TOKEN")->plainTextToken, #create token of this admin
+                'status'=>true]);
 
         } catch (\Throwable $th) {
             return response()->json([
@@ -77,6 +76,7 @@ class AuthController extends Controller
     public function updatePassword(Request $request)
     {
         try {
+            #validation request
             $validateUser = Validator::make(
                 $request->all(),
                 [
@@ -84,7 +84,7 @@ class AuthController extends Controller
                     'new_password' => 'required|confirmed|min:8'
                 ]
             );
-
+            // valid error message
             if ($validateUser->fails()) {
                 return response()->json([
                     'status' => false,
@@ -92,9 +92,12 @@ class AuthController extends Controller
                     'errors' => $validateUser->errors()
                 ], 401);
             }
+            #check if old password true or not
             if (Hash::check($request->old_password, auth()->user()->password)) {
-             /*get user => */   $user = auth()->user();
-             /*get user and uodate password => */   User::find($user->id)->update(['password' => Hash::make($request->new_password)]);
+                #Get Auth User
+                $user = auth()->user();
+                #get user and upodate password with hashing it
+                User::find($user->id)->update(['password' => Hash::make($request->new_password)]);
                 return response()->json(['message' => 'password has been changed']);
             } else {
                 return response()->json(['message' => 'old password wrong']);

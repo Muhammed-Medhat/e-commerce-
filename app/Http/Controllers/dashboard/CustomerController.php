@@ -12,33 +12,36 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
         //traits
-        use UploadBese64Image;
-        use DeleteBaser64Image;
+        use UploadBese64Image; # store image
+        use DeleteBaser64Image; # delete image
 
 
     function createCustomer(CreateCustomerRequest $request) {
         try {
-            #get validation data requests => 
+            #get validation data requests
             $validation_data = $request->validated();
+            # set user as a customer auto
             $validation_data['is_admin'] = 0;
+            # hashing password
             $validation_data['password'] = Hash::make($validation_data['password']);
-
-
+            #check if i have image key in request
             if (array_key_exists('image', $validation_data)) {
-                    $validation_data['image'] = $this->UploadBese64Image($validation_data['image'],'users');
+                #store path image in foleder and save image in DB
+                $validation_data['image'] = $this->UploadBese64Image($validation_data['image'],'users');
             } else {
+                #set image column in DB as null
                     $validation_data['image'] = null;
                 }
+
             #create user =>
             $user = User::create($validation_data);
-            return response()->json(['data'=>$user, 'status'=>true]);
 
+            return response()->json(['data'=>$user, 'status'=>true]);
 
         } catch (\Throwable $th) {
             return response()->json([
@@ -50,25 +53,36 @@ class CustomerController extends Controller
 
     function updateCustomer(UpdateCustomerRequest $request, $id) {
         try {
+            #get user by ID
             $user = User::find($id);
+            #check if user nof found in DB
             if (!$user) {
                 return response()->json(['message'=>'user not found', 'status'=>false],404);
             }
             #get validation data requests => 
             $validation_data = $request->validated();
+            # set user as a customer auto
             $validation_data['is_admin'] = 0;
-
+            #check if i have password key in request
+            if (array_key_exists('password', $validation_data)) {
+                # hashing password
+                $validation_data['password'] = Hash::make($validation_data['password']);
+            }
+            #check if i have image key in request
             if (array_key_exists('image', $validation_data)) {
+                #check if i have a value in image Or NOT 
                 if ($validation_data['image'] !== null) {
                     ## delete old image ##
-                    $image = $user->getRawOriginal('image');
-                    $this->DeleteBaser64Image($image,'users');
+                    $image = $user->getRawOriginal('image'); // Get Original name of image without path 
+                    $this->DeleteBaser64Image($image,'users'); // Delete IMAGE in folder users
 
-                    ## insert new image ##
+                    ## insert new image in DB & insert new image in folder users ##
                     $validation_data['image'] = $this->UploadBese64Image($validation_data['image'],'users');
-                } else {
+
+                } else { // A value of image key is Null thats mian delete image from image and DB
+                    # Get Original name of image without path 
+                    $image = $user->getRawOriginal('image'); 
                     ## delete image ##
-                    $image = $user->getRawOriginal('image');
                     $this->DeleteBaser64Image($image,'users');
                 }
             }
@@ -88,14 +102,16 @@ class CustomerController extends Controller
     function deleteCustomer($id) {
         
         try {
+            #get user by ID & Make sure it's a customer
             $customer = User::where('id',$id)->where('is_admin',0)->first();
+            #check if user nof found in DB or NOT
             if (!$customer) {
-                return response()->json(['message'=>'somthing wrong', 'status'=>false]);
+                return response()->json(['message'=>'somthing wrong', 'status'=>false],404);
             } else {
                     ## delete image ##
-                    $image = $customer->getRawOriginal('image');
-                    $this->DeleteBaser64Image($image,'users');
-                $customer->delete();
+                    $image = $customer->getRawOriginal('image'); // Get Original name of image without path 
+                    $this->DeleteBaser64Image($image,'users'); // Delete IMAGE in folder users
+                    $customer->delete(); // delete customer in DB
                 return response()->json(['message'=>"customer has been deleted",'status'=>true]);
             }
         } catch (\Throwable $th) {
@@ -105,11 +121,12 @@ class CustomerController extends Controller
             ], 500);
         }
     }
+
     //get all users customers and admins
     function listing(Request $request) {
         try {
 
-            // Validation
+            // Validation Rules
             $validator = Validator::make($request->all(), [
                 'q'=>['string'],
                 'sort_by' => [Rule::in(["a-z","z-a","old","new"])],
@@ -125,46 +142,50 @@ class CustomerController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
+            #Preparation query
             $customers = User::query();
+            //////////////////////////// start filters //////////////////////////////////////////////
 
+            /*admin or customer filter */
             if ($request->has('is_admin')) {
                 $request->is_admin == 1 ? $customers->where('is_admin',1) : $customers->where('is_admin',0);
             }
 
+            /* Filter by data range */
             if(isset($request->filter_by_date_range)){
                 $filter_by_date_range = json_decode($request->filter_by_date_range);
-    
                 $customers->whereBetween('created_at', [
                     Carbon::parse($filter_by_date_range[0])->format('Y-m-d\TH:i:s.u\Z'),
                     Carbon::parse($filter_by_date_range[1])->format('Y-m-d\TH:i:s.u\Z'),
                 ]);
             }
-                // Filter by search
-                if(isset($request->q)){
-                    $query = $request->q;
-                    $customers
-                    ->where('name_ar', 'like', "%{$query}%");
-                }
+            /* Filter by search */
+            if(isset($request->q)){
+                $query = $request->q;
+                $customers
+                ->where('name', 'like', "%{$query}%");
+            }
     
-            // Sort asc
+            /* Sort asc */
             if(isset($request->sort_by) && $request->sort_by == "a-z"){
                 $customers->orderBy("id","asc");
             }
     
-            // Sort desc
+            /* Sort desc */
             if(isset($request->sort_by) && $request->sort_by == "z-a"){
                 $customers->orderBy("id","desc");
             }
     
-            // Filter by date old
+            /* Filter by date old */
             if(isset($request->sort_by) && $request->sort_by == "old"){
                 $customers->orderBy("created_at","asc");
             }
         
-            // Filter by date new
+            /* Filter by date new */
             if(isset($request->sort_by) && $request->sort_by == "new"){
                 $customers->orderBy("created_at","desc");
             }
+            //////////////////////////// end filters //////////////////////////////////////////////
 
             return response()->json(['data'=>$customers->paginate(), 'status'=>true]);
 
@@ -178,11 +199,14 @@ class CustomerController extends Controller
 
     function viewCustomer($id) {
         try {
-            $customer = User::getCustomerById($id);
+            #get user by ID & Make sure it's a customer
+            $customer = User::where('id',$id)->where('is_admin',0)->first();
+            #check if user nof found in DB
             if (!$customer) {
-                return response()->json(['message'=>'something wrong','status'=>false]);
+                return response()->json(['message'=>'something wrong','status'=>false],404);
             }
             return response()->json(['data'=>$customer,'status'=>true]);
+
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,

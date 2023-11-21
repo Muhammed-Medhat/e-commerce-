@@ -36,6 +36,7 @@ class UpdateCustomerRequest extends FormRequest
             'gender' => [Rule::in(["male", "female"])],
         ];
     }
+
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
