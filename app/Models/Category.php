@@ -24,6 +24,9 @@ class Category extends Model
         );
     }
 
+    ##############################
+    ####  Relationships  ####
+    ##############################
 
     /**
      * Get the sub_categories for the blog post.
@@ -39,6 +42,14 @@ class Category extends Model
     public function parent()
     {
         return $this->belongsTo(Category::class ,'parent_category');
+    }
+
+    /**
+     * Get the products for the category.
+     */
+    public function products()
+    {
+        return $this->hasMany(Product::class,'category_id', 'id');
     }
 
 }

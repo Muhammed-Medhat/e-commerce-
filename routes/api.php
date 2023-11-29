@@ -4,6 +4,7 @@ use App\Http\Controllers\dashboard\AuthController;
 use App\Http\Controllers\dashboard\BrandController;
 use App\Http\Controllers\dashboard\CategoryController;
 use App\Http\Controllers\dashboard\CustomerController;
+use App\Http\Controllers\dashboard\ProductController;
 use App\Http\Controllers\dashboard\StaffController;
 use Illuminate\Support\Facades\Route;
 
@@ -55,4 +56,12 @@ Route::prefix('staff')->middleware(['auth:sanctum'])->group(function () {
     // Route::get('staff', [StaffController::class, 'listing']);
     Route::get('view-staff/{id}', [StaffController::class, 'viewStaff']);
     Route::get('delete-staff/{id}', [StaffController::class, 'deleteStaff']);
+});
+
+Route::prefix('products')->middleware(['auth:sanctum'])->group(function () {
+    Route::post('add-product', [ProductController::class, 'createProduct']);
+    Route::post('update-product/{id}', [ProductController::class, 'updateSProduct']);
+    Route::get('products', [ProductController::class, 'listing']);
+    Route::get('view-product/{id}', [ProductController::class, 'viewProduct']);
+    Route::get('delete-product/{id}', [ProductController::class, 'deleteProduct']);
 });
