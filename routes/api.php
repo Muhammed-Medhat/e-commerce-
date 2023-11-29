@@ -4,6 +4,7 @@ use App\Http\Controllers\dashboard\AuthController;
 use App\Http\Controllers\dashboard\BrandController;
 use App\Http\Controllers\dashboard\CategoryController;
 use App\Http\Controllers\dashboard\CustomerController;
+use App\Http\Controllers\dashboard\StaffController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,4 +47,12 @@ Route::prefix('categories')->middleware(['auth:sanctum'])->group(function () {
     Route::get('categories', [CategoryController::class, 'listing']);
     Route::get('view-category/{id}', [CategoryController::class, 'viewCategory']);
     Route::get('delete-category/{id}', [CategoryController::class, 'deleteCategory']);
+});
+
+Route::prefix('staff')->middleware(['auth:sanctum'])->group(function () {
+    Route::post('add-staff', [StaffController::class, 'createStaff']);
+    Route::post('update-staff/{id}', [StaffController::class, 'updateStaff']);
+    // Route::get('staff', [StaffController::class, 'listing']);
+    Route::get('view-staff/{id}', [StaffController::class, 'viewStaff']);
+    Route::get('delete-staff/{id}', [StaffController::class, 'deleteStaff']);
 });
