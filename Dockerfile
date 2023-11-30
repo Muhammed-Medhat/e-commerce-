@@ -10,7 +10,7 @@ COPY . .
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-ENV PORT=8000
+ENV PORT=9000
 
 ENTRYPOINT [ "docker/entrypoint.sh" ]
 # chmod +x docker/entrypoint.sh

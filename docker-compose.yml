@@ -14,7 +14,7 @@ services:
     volumes:
       - ./:/var/www
     ports:
-      - 8000:8000
+      - 9000:9000
     depends_on:
       - mysql
   # Database Service
