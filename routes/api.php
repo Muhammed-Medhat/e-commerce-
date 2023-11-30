@@ -31,7 +31,7 @@ Route::prefix('customers')->middleware(['auth:sanctum'])->group(function () {
     Route::post('update-customer/{id}', [CustomerController::class, 'updateCustomer']);
     Route::get('customers', [CustomerController::class, 'listing']);
     Route::get('view-customer/{id}', [CustomerController::class, 'viewCustomer']);
-    Route::get('delete-customer/{id}', [CustomerController::class, 'deleteCustomer']);
+    Route::delete('delete-customer/{id}', [CustomerController::class, 'deleteCustomer']);
 });
 
 Route::prefix('brands')->middleware(['auth:sanctum'])->group(function () {
@@ -39,7 +39,7 @@ Route::prefix('brands')->middleware(['auth:sanctum'])->group(function () {
     Route::post('update-brand/{id}', [BrandController::class, 'updateBrand']);
     Route::get('brands', [BrandController::class, 'listing']);
     Route::get('view-brand/{id}', [BrandController::class, 'viewBrand']);
-    Route::get('delete-brand/{id}', [BrandController::class, 'deleteBrand']);
+    Route::delete('delete-brand/{id}', [BrandController::class, 'deleteBrand']);
 });
 
 Route::prefix('categories')->middleware(['auth:sanctum'])->group(function () {
@@ -47,7 +47,7 @@ Route::prefix('categories')->middleware(['auth:sanctum'])->group(function () {
     Route::post('update-category/{id}', [CategoryController::class, 'updateCategory']);
     Route::get('categories', [CategoryController::class, 'listing']);
     Route::get('view-category/{id}', [CategoryController::class, 'viewCategory']);
-    Route::get('delete-category/{id}', [CategoryController::class, 'deleteCategory']);
+    Route::delete('delete-category/{id}', [CategoryController::class, 'deleteCategory']);
 });
 
 Route::prefix('staff')->middleware(['auth:sanctum'])->group(function () {
@@ -55,13 +55,13 @@ Route::prefix('staff')->middleware(['auth:sanctum'])->group(function () {
     Route::post('update-staff/{id}', [StaffController::class, 'updateStaff']);
     // Route::get('staff', [StaffController::class, 'listing']);
     Route::get('view-staff/{id}', [StaffController::class, 'viewStaff']);
-    Route::get('delete-staff/{id}', [StaffController::class, 'deleteStaff']);
+    Route::delete('delete-staff/{id}', [StaffController::class, 'deleteStaff']);
 });
 
 Route::prefix('products')->middleware(['auth:sanctum'])->group(function () {
     Route::post('add-product', [ProductController::class, 'createProduct']);
-    Route::post('update-product/{id}', [ProductController::class, 'updateSProduct']);
+    Route::post('update-product/{id}', [ProductController::class, 'updateProduct']);
     Route::get('products', [ProductController::class, 'listing']);
     Route::get('view-product/{id}', [ProductController::class, 'viewProduct']);
-    Route::get('delete-product/{id}', [ProductController::class, 'deleteProduct']);
+    Route::delete('delete-product/{id}', [ProductController::class, 'deleteProduct']);
 });

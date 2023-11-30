@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug');
             $table->string('description');
-            $table->string('status');
+            $table->integer('status')->default(0);
             $table->string('meta_title');
             $table->string('meta_description');
             $table->float('weight');
