@@ -1,16 +1,33 @@
-FROM php:8.2 as php
+FROM php:8.2.11-fpm
 
-RUN apt-get update -y
-RUN apt-get install -y unzip libpq-dev libcurl4-gnutls-dev
-RUN docker-php-ext-install pdo pdo_mysql bcmath
+# Install composer
+RUN echo "\e[1;33mInstall COMPOSER\e[0m"
+RUN cd /tmp \
+    && curl -sS https://getcomposer.org/installer | php \
+    && mv composer.phar /usr/local/bin/composer
 
-WORKDIR /var/www
+RUN docker-php-ext-install pdo pdo_mysql
 
-COPY . .
+RUN apt-get update
 
-COPY --from=composer /usr/bin/composer /usr/bin/composer
+# Install useful tools
+RUN apt-get -y install apt-utils nano wget dialog vim
 
-ENV PORT=9000
-
-ENTRYPOINT [ "docker/entrypoint.sh" ]
-# chmod +x docker/entrypoint.sh
+# Install important libraries
+RUN echo "\e[1;33mInstall important libraries\e[0m"
+RUN apt-get -y install --fix-missing \
+    apt-utils \
+    build-essential \
+    git \
+    curl \
+    libcurl4 \
+    libcurl4-openssl-dev \
+    zlib1g-dev \
+    libzip-dev \
+    zip \
+    libbz2-dev \
+    locales \
+    libmcrypt-dev \
+    libicu-dev \
+    libonig-dev \
+    libxml2-dev
