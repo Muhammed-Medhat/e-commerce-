@@ -39,17 +39,6 @@ services:
       - 9000:9000
     depends_on:
       - mysql
-  # Application Service
-  # app:
-  #   container_name: blog
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./:/var/www
-  #   ports:
-  #     - "9000:9000"
-  #   working_dir: /var/www
 
 #top levelVolume 
 #create a volume name is db-data
