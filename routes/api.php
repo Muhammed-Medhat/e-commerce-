@@ -4,6 +4,7 @@ use App\Http\Controllers\dashboard\AuthController;
 use App\Http\Controllers\dashboard\BrandController;
 use App\Http\Controllers\dashboard\CategoryController;
 use App\Http\Controllers\dashboard\CustomerController;
+use App\Http\Controllers\dashboard\OrderController;
 use App\Http\Controllers\dashboard\ProductController;
 use App\Http\Controllers\dashboard\StaffController;
 use Illuminate\Support\Facades\Route;
@@ -64,4 +65,12 @@ Route::prefix('products')->middleware(['auth:sanctum'])->group(function () {
     Route::get('products', [ProductController::class, 'listing']);
     Route::get('view-product/{id}', [ProductController::class, 'viewProduct']);
     Route::delete('delete-product/{id}', [ProductController::class, 'deleteProduct']);
+});
+
+Route::prefix('orders')->middleware(['auth:sanctum'])->group(function () {
+    Route::post('add-order', [OrderController::class, 'createOrder']);
+    Route::post('update-order/{id}', [OrderController::class, 'updateOrder']);
+    Route::get('orders', [OrderController::class, 'listing']);
+    Route::get('view-order/{id}', [OrderController::class, 'viewOrder']);
+    Route::delete('delete-order/{id}', [OrderController::class, 'deleteOrder']);
 });

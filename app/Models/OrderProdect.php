@@ -10,7 +10,7 @@ class OrderProdect extends Model
     use HasFactory;
 
     protected $guarded = [];
-    protected $with = ['order','products_order'];
+    protected $with = ['product'];
 
     ##############################
     ####  Relationships  ####
