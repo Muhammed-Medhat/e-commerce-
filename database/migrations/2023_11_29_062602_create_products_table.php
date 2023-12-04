@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('model_number');
             $table->float('price')->nullable();
             $table->integer('discount')->nullable();
-            $table->enum('discount_type', ['amount', 'percentage'])->nullable();
+            $table->enum('discount_type', ['amount', 'percentage'])->default('amount');
             $table->string('video_link')->nullable();
             $table->enum('type', ['single', 'variant'])->default('single');
             $table->foreignId('category_id')

@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
@@ -27,12 +26,13 @@ class CreateOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            "name"=>"required|string",
-            'email' => ['required', Rule::in([0, 1])],
+            "name"=>"required|string|exists:users,name",
+            'email' => ['required', 'exists:users,email'],
             "address"=>"required|string",
-            "name"=>"required|string",
-            // "status"=>"required|string",
-            "qty"=>"required|numaric",
+            'user_id'=>'required|numeric|exists:users,id',
+            'products' => 'required|array',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.qty_product' => 'required|numeric'
         ];
     }
 
