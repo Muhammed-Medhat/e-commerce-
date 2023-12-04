@@ -10,7 +10,7 @@ class Order extends Model
     use HasFactory;
 
     protected $guarded = [];
-    protected $with = ['user','products_order'];
+    protected $with = ['created_by','user','products_order'];
 
     ##############################
     ####  Relationships  ####
@@ -24,11 +24,20 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
+    /** 
      * Get the products_order for the order.
      */
     public function products_order()
     {
         return $this->hasMany(OrderProdect::class);
     }
+
+    /**
+     * Get the user that owns the order. created_by
+     */
+    public function created_by()
+    {
+        return $this->belongsTo(User::class,'created_by', 'id');
+    }
+    
 }

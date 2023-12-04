@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateOrderRequest;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,7 @@ class OrderController extends Controller
         }
     }
 
-    function createOrder()  {
+    function createOrder(CreateOrderRequest $request)  {
      //   
     }
 }

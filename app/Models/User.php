@@ -50,11 +50,18 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the orders for the user.
+     * Get the orders for the user. as order to 
      */
     public function orders()
     {
         return $this->hasMany(Order::class,'user_id', 'id');
+    }
+    /**
+     * Get the orders for the user. created_by
+     */
+    public function created_by()
+    {
+        return $this->hasMany(Order::class,'created_by', 'id');
     }
 
 }
