@@ -63,6 +63,7 @@ class OrderController extends Controller
                     }
                     
                 }
+                #create products of order
                 $prodcuts_order = OrderProdect::create([
                     'order_id'=>$order->id,
                     'product_id'=>$product['product_id'],
@@ -149,6 +150,7 @@ class OrderController extends Controller
                         }
                         
                     }
+                    #create products of order
                     $prodcuts_order = OrderProdect::create([
                         'order_id'=>$order->id,
                         'product_id'=>$product['product_id'],
@@ -178,9 +180,9 @@ class OrderController extends Controller
             if (!$order) {
                 return response()->json(['message'=>'not found', 'status'=>false]);
             }
-                #delete order products
-                $order->products_order()->delete();
-                return response()->json(['message'=>'order has been deleted','status'=>true]);
+            #delete order products
+            $order->products_order()->delete();
+            return response()->json(['message'=>'order has been deleted','status'=>true]);
 
         } catch (\Throwable $th) {
             return response()->json([
