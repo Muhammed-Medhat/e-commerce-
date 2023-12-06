@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('address');
             $table->foreignId('created_by')->constrained('users', 'id')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users', 'id')->onUpdate('cascade')->onDelete('cascade');
-            $table->enum('status', ['decliend', 'pending','confirmed'])->default('pending');
+            $table->enum('status', ['decliend', 'unpaid','paid'])->default('pending');
             $table->integer('qty');
             $table->string('stripe_session_id')->nullable();
             $table->timestamps();

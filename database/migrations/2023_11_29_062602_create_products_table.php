@@ -26,7 +26,7 @@ return new class extends Migration
             $table->float('breadth');
             $table->float('height');
             $table->string('model_number');
-            $table->float('price')->nullable();
+            $table->float('price');
             $table->integer('discount')->nullable();
             $table->enum('discount_type', ['amount', 'percentage'])->default('amount');
             $table->string('video_link')->nullable();

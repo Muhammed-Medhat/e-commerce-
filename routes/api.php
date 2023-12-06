@@ -7,6 +7,7 @@ use App\Http\Controllers\dashboard\CustomerController;
 use App\Http\Controllers\dashboard\OrderController;
 use App\Http\Controllers\dashboard\ProductController;
 use App\Http\Controllers\dashboard\StaffController;
+use App\Http\Controllers\dashboard\StipeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -73,4 +74,10 @@ Route::prefix('orders')->middleware(['auth:sanctum'])->group(function () {
     Route::get('orders', [OrderController::class, 'listing']);
     Route::get('view-order/{id}', [OrderController::class, 'viewOrder']);
     Route::delete('delete-order/{id}', [OrderController::class, 'deleteOrder']);
+});
+
+Route::controller(StipeController::class)->group(function () {
+    Route::get('/stripe/sucsses', 'stripeCheckoutSuccess')->name('stripe.checkout.success');
+    Route::post('pay/{id}', 'pay');
+    Route::post('webhook', 'webhook');
 });

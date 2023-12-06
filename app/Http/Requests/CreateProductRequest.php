@@ -38,7 +38,7 @@ class CreateProductRequest extends FormRequest
             "breadth"=>"required|numeric",
             "height"=>"required|numeric",
             "model_number"=>"required|string",
-            "price"=>"numeric",
+            "price"=>"required|numeric",
             "discount"=>"numeric",
             'discount_type' => [Rule::in(['amount', 'percentage'])],
             "video_link"=>"url",
