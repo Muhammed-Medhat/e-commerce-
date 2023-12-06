@@ -80,8 +80,7 @@ class StipeController extends Controller
     }
 
     function webhook() {
-
-
+                #code from stripe.com
         // This is your Stripe CLI webhook secret for testing your endpoint locally.
         $endpoint_secret = env("STRIPE_WEBHOOK_SECRET");
 
@@ -107,9 +106,11 @@ class StipeController extends Controller
         switch ($event->type) {
         case 'checkout.session.completed':
             $session = $event->data->object;
+            #get order by session ID
             $order =  Order::where('stripe_session_id',$session->id)->first();
             if ($order) {
-                $order->update(['status'=>'confirmed']);
+                #update status order
+                $order->update(['status'=>'paid']);
             }
         // ... handle other event types
         default:
