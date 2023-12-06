@@ -21,6 +21,10 @@ class StipeController extends Controller
             if (!$order) {
                 return response()->json(['message'=>'something wrong','status'=>false],404);
             }
+            #check if order status is paid
+            if ($order->status == 'paid') {
+                return response()->json(['message'=>'order is alraedy paided','status'=>false],200);
+            }
             #get email of user
             $customer_email = $order['user']['email'];
                 #get data to send it to stripe
@@ -40,7 +44,7 @@ class StipeController extends Controller
                 }
                 #open session 
                 $checkout = $this->stripe->checkout->sessions->create([
-                'success_url' => route("stripe.checkout.success") . '?session_id={CHECKOUT_SESSION_ID}',
+                'success_url' => route("stripe.checkout.success") . '?session_id={CHECKOUT_SESSION_ID}', # should be real page frontend not like this 
                 'customer_email'=>$customer_email,
                 'line_items' => $line_items,
                 'mode' => 'payment',
