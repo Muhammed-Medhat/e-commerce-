@@ -16,7 +16,7 @@ class StipeController extends Controller
     function pay($id) {
         try {
             #get order by ID
-            $order = Order::find($id);
+            $order = Order::where('id',$id)->where('status','unpaid')->first();
             #check if order not found in DB
             if (!$order) {
                 return response()->json(['message'=>'something wrong','status'=>false],404);

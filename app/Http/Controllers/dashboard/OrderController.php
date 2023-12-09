@@ -102,7 +102,7 @@ class OrderController extends Controller
 
     function updateOrder(UpdateOrderRequest $request ,$id) {
         try {
-            $order = Order::find($id);
+            $order = Order::where('id',$id)->where('status','unpaid')->first();
             if (!$order) {
                 return response()->json(['message'=>'not found', 'status'=>false]);
             }
@@ -175,7 +175,7 @@ class OrderController extends Controller
 
     function deleteOrder($id)  {
         try {
-            $order = Order::find($id);
+            $order = Order::where('id',$id)->where('status','unpaid')->first();
 
             if (!$order) {
                 return response()->json(['message'=>'not found', 'status'=>false]);
