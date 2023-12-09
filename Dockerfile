@@ -33,8 +33,8 @@ RUN apt-get -y install --fix-missing \
     libxml2-dev
 
 # Start PHP-FPM
-CMD ["php-fpm"]
-
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
+# CMD ["php-fpm"]
+ENTRYPOINT [ "docker/entrypoint.sh" ]
+# COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+# RUN chmod +x /usr/local/bin/entrypoint.sh
+# php artisan migrate:fresh --seed 

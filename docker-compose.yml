@@ -37,7 +37,7 @@ services:
       - ./:/var/www/html
     ports:
       - 9000:9000
-    command: /usr/local/bin/entrypoint.sh
+    # command: /usr/local/bin/entrypoint.sh
     depends_on:
       - mysql
 
