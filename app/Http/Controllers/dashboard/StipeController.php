@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderCreated;
 use App\Models\Order;
+use App\Models\User;
 use Laravel\Cashier\Cashier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class StipeController extends Controller
 {
@@ -118,5 +121,11 @@ class StipeController extends Controller
         }
 
         return response('');
-            }
+    }
+
+    function testmail() {
+        $order = Order::first();
+        Mail::to('muhammadmedhat3@gmail.com')->send(new OrderCreated($order));
+        return response()->json(['message'=>'done'],200);
+    }
 }

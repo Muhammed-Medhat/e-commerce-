@@ -149,6 +149,8 @@ class CustomerController extends Controller
             /*admin or customer filter */
             if ($request->has('is_admin')) {
                 $request->is_admin == 1 ? $customers->where('is_admin',1) : $customers->where('is_admin',0);
+            }else {
+                $customers->where('is_admin',0);
             }
 
             /* Filter by data range */

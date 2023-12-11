@@ -80,4 +80,5 @@ Route::controller(StipeController::class)->group(function () {
     Route::get('/stripe/sucsses', 'stripeCheckoutSuccess')->name('stripe.checkout.success');
     Route::post('pay/{id}', 'pay');
     Route::post('webhook', 'webhook');
+    Route::get('testmail', 'testmail');
 });
