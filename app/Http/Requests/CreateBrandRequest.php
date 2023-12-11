@@ -17,7 +17,7 @@ class CreateBrandRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -31,7 +31,7 @@ class CreateBrandRequest extends FormRequest
             "name"=>"required|string",
             'description' => 'string',
             'website_link' => 'url',
-            "logo"=>["required",new isBase64Image()],
+            "logo"=>[new isBase64Image()],
             'status' => ['required', Rule::in([0, 1])],
         ];
     }

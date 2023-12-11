@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users', 'id')->onUpdate('cascade')->onDelete('cascade');
             $table->enum('status', ['decliend', 'unpaid','paid'])->default('unpaid');
             $table->integer('qty');
+            $table->float('total_price')->default(0);
             $table->string('stripe_session_id')->nullable();
             $table->timestamps();
         });

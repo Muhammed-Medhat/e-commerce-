@@ -41,7 +41,8 @@ class OrderController extends Controller
             $validation_data['qty'] = count($validation_data['products']);
             #create order
             $order = Order::create(Arr::except($validation_data,['products']));
-
+            #total_price on order
+            $total_price_order = 0;
             foreach ($validation_data['products'] as $key => $product) {
                 #get data of product
                 $product_data = Product::where('id',$product['product_id'])->first();
@@ -56,13 +57,21 @@ class OrderController extends Controller
                     if ($product_data->discount_type == 'amount') {
                         $price = $product_data->price - $product_data->discount;
                         $total_price = $price * $product['qty_product'];
+                        $total_price_order += $total_price;
 
                     } elseif ($product_data->discount_type  == 'percentage') {
                         $price = $product_data->price - (($product_data->price / 100) * $product_data->discount);
                         $total_price = $price * $product['qty_product'];
+                        $total_price_order += $total_price;
                     }
                     
+                }else {
+                    $price = $product_data->price;
+                    $total_price = $price * $product['qty_product'];
+                    $total_price_order += $total_price;
                 }
+                #set total_price on order 
+                $order->update(['total_price'=>$total_price_order]);
                 #create products of order
                 $prodcuts_order = OrderProdect::create([
                     'order_id'=>$order->id,

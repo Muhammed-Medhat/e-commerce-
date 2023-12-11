@@ -46,7 +46,7 @@ class OrderCreated extends Mailable
     public function content()
     {
         return new Content(
-            markdown: 'emails.orders.created',
+            view: 'emails.orders.created',
         );
     }
 

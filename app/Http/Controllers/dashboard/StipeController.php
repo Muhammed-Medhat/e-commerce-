@@ -114,6 +114,8 @@ class StipeController extends Controller
             if ($order) {
                 #update status order
                 $order->update(['status'=>'paid']);
+                #send email to user 
+                Mail::to($order->email)->send(new OrderCreated($order));
             }
         // ... handle other event types
         default:
@@ -125,7 +127,7 @@ class StipeController extends Controller
 
     function testmail() {
         $order = Order::first();
-        Mail::to('muhammadmedhat3@gmail.com')->send(new OrderCreated($order));
+        Mail::to($order->email)->send(new OrderCreated($order));
         return response()->json(['message'=>'done'],200);
     }
 }
