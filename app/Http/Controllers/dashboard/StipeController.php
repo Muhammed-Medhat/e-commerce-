@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendEmailQueueJob;
 use App\Mail\OrderCreated;
 use App\Models\Order;
 use App\Models\User;
@@ -114,8 +115,8 @@ class StipeController extends Controller
             if ($order) {
                 #update status order
                 $order->update(['status'=>'paid']);
-                #send email to user 
-                Mail::to($order->email)->send(new OrderCreated($order));
+                #send email to user use queue
+                dispatch(new SendEmailQueueJob($order));
             }
         // ... handle other event types
         default:
@@ -127,7 +128,8 @@ class StipeController extends Controller
 
     function testmail() {
         $order = Order::first();
-        Mail::to($order->email)->send(new OrderCreated($order));
+        // Mail::to($order->email)->send(new OrderCreated($order));
+        dispatch(new SendEmailQueueJob($order));
         return response()->json(['message'=>'done'],200);
     }
 }
