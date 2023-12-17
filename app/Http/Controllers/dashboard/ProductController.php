@@ -13,6 +13,9 @@ use App\Traits\DeleteBase64Image;
 use App\Traits\UploadBese64Image;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class ProductController extends Controller
 {
@@ -66,10 +69,96 @@ class ProductController extends Controller
         }
     }
 
-    function listing() {
+    function listing(Request $request) {
         try {
-            $products = Product::paginate();
-            return response()->json(['data'=>$products, 'status'=>true]);
+                // Validation Rules
+                $validator = Validator::make($request->all(), [
+                    'q' => ['string'],
+                    'sort_by' => [Rule::in(["rating-high-to-low","rating-low-to-high","low-to-high", "high-to-low", "a-z", "z-a", "old", "new"])],
+                    'price_range' => ['json'],
+                    'filter_by_brand' => ['json'],
+                    'filter_by_categories' => ['json'],
+                    'filter_by_date_range' => ['json'],
+                ]);
+    
+                // valid error message
+                if ($validator->fails()) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'validation error',
+                        'errors' => $validator->errors()
+                    ], 422);
+                }
+                #Preparation query
+                $products = Product::query();
+                            //////////////////////////// start filters //////////////////////////////////////////////
+
+                /* Filter by data range */
+                if(isset($request->filter_by_date_range)){
+                    $filter_by_date_range = json_decode($request->filter_by_date_range);
+                    $products->whereBetween('created_at', [
+                        Carbon::parse($filter_by_date_range[0])->format('Y-m-d\TH:i:s.u\Z'),
+                        Carbon::parse($filter_by_date_range[1])->format('Y-m-d\TH:i:s.u\Z'),
+                    ]);
+                }
+                /* Filter by search */
+                if(isset($request->q)){
+                    $query = $request->q;
+                    $products
+                    ->where('name', 'like', "%{$query}%");
+                }
+        
+                /* Sort asc */
+                if(isset($request->sort_by) && $request->sort_by == "a-z"){
+                    $products->orderBy("id","asc");
+                }
+        
+                /* Sort desc */
+                if(isset($request->sort_by) && $request->sort_by == "z-a"){
+                    $products->orderBy("id","desc");
+                }
+        
+                /* Filter by date old */
+                if(isset($request->sort_by) && $request->sort_by == "old"){
+                    $products->orderBy("created_at","asc");
+                }
+            
+                /* Filter by date new */
+                if(isset($request->sort_by) && $request->sort_by == "new"){
+                    $products->orderBy("created_at","desc");
+                }
+                // Filter by brands
+                if (isset($request->filter_by_brands)) {
+                    $filter_by_brands = json_decode($request->filter_by_brands);
+                    $products->whereHas('brand', function ($query) use ($filter_by_brands) {
+                        $query->whereIn('name', $filter_by_brands);
+                    });
+                }
+
+                // Filter by categories
+                if (isset($request->filter_by_categories)) {
+                    $filter_by_categories = json_decode($request->filter_by_categories);
+                    $products->whereHas('category', function ($query) use ($filter_by_categories) {
+                        $query->whereIn('name', $filter_by_categories);
+                    });
+                }
+                // Filter by price range
+                if (isset($request->price_range)) {
+                    $price_range = json_decode($request->price_range); // ex. [10, 20]
+                    $products->whereBetween('price', $price_range);
+                }
+                // Filter by price low-to-high
+                if (isset($request->sort_by) && $request->sort_by == "low-to-high") {
+                    $products->orderBy('price','asc');
+                
+                }
+
+                // Filter by price high-to-low
+                if (isset($request->sort_by) && $request->sort_by == "high-to-low") {
+                    $products->orderBy('price','desc');
+                }
+        
+            return response()->json(['data'=>$products->paginate(), 'status'=>true]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
