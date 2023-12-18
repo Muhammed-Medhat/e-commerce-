@@ -11,13 +11,118 @@ use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
-    function listing()  {
+    function listing(Request $request)  {
         try {
-            $orders = Order::paginate();
-            return response()->json(['data'=>$orders , "status"=>true]);
+                // Validation Rules
+                $validator = Validator::make($request->all(), [
+                    'q' => ['string'],
+                    'sort_by' => [Rule::in(["qty-low-to-high", "qty-high-to-low","low-to-high", "high-to-low", "a-z", "z-a", "old", "new"])],
+                    'filter_by_status' => [Rule::in(['paid','unpaid'])],
+                    'filter_by_date_range' => ['json'],
+                    'filter_by_total_amount_range' => ['json'],
+                ]);
+
+                // valid error message
+                if ($validator->fails()) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'validation error',
+                        'errors' => $validator->errors()
+                    ], 422);
+                }
+                #Preparation query
+                $orders = Order::query();
+                            //////////////////////////// start filters //////////////////////////////////////////////
+
+                /* Filter by data range */
+                if(isset($request->filter_by_date_range)){
+                    $filter_by_date_range = json_decode($request->filter_by_date_range);
+                    $orders->whereBetween('created_at', [
+                        Carbon::parse($filter_by_date_range[0])->format('Y-m-d\TH:i:s.u\Z'),
+                        Carbon::parse($filter_by_date_range[1])->format('Y-m-d\TH:i:s.u\Z'),
+                    ]);
+                }
+                /* Filter by search */
+                if(isset($request->q)){
+                    $query = $request->q;
+                    $orders
+                    ->where('email', 'like', "%{$query}%")
+                    ->orWhereHas('user', function ($q) use ($query) {
+                        $q->where('email', 'like', "%{$query}%")
+                            ->orWhere('name', 'like', "%{$query}%");
+                    });
+
+                }
+        
+                /* Sort asc */
+                if(isset($request->sort_by) && $request->sort_by == "a-z"){
+                    $orders->orderBy("id","asc");
+                }
+        
+                /* Sort desc */
+                if(isset($request->sort_by) && $request->sort_by == "z-a"){
+                    $orders->orderBy("id","desc");
+                }
+        
+                /* Filter by date old */
+                if(isset($request->sort_by) && $request->sort_by == "old"){
+                    $orders->orderBy("created_at","asc");
+                }
+            
+                /* Filter by date new */
+                if(isset($request->sort_by) && $request->sort_by == "new"){
+                    $orders->orderBy("created_at","desc");
+                }
+
+                /* Filter by status */
+                if(isset($request->filter_by_status)){
+
+                        if ($request->filter_by_status =='paid') {
+                            $orders->where("status","paid");
+                        } elseif ($request->filter_by_status =='unpaid') {
+                            $orders->where("status","unpaid");
+                        }
+                }
+
+                // Filter by price range
+                if (isset($request->price_range)) {
+                    $price_range = json_decode($request->price_range); // ex. [10, 20]
+                    $orders->whereBetween('total_price', $price_range);
+                }
+
+                // Filter by price low-to-high
+                if (isset($request->sort_by) && $request->sort_by == "low-to-high") {
+                    $orders->orderBy('total_price','asc');
+                }
+
+                // Filter by price high-to-low
+                if (isset($request->sort_by) && $request->sort_by == "high-to-low") {
+                    $orders->orderBy('total_price','desc');
+                }
+
+                // Filter by qty range
+                if (isset($request->qty)) {
+                    $qty = json_decode($request->qty); // ex. [10, 20]
+                    $orders->whereBetween('qty', $qty);
+                }
+                
+                // Filter by qty low-to-high
+                if (isset($request->sort_by) && $request->sort_by == "qty-low-to-high") {
+                    $orders->orderBy('qty','asc');
+                }
+
+                // Filter by qty high-to-low
+                if (isset($request->sort_by) && $request->sort_by == "qty-high-to-low") {
+                    $orders->orderBy('qty','desc');
+                }
+
+            return response()->json(['data'=>$orders->paginate() , "status"=>true]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
