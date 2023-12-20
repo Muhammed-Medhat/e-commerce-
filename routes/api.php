@@ -7,6 +7,7 @@ use App\Http\Controllers\dashboard\CustomerController;
 use App\Http\Controllers\dashboard\OrderController;
 use App\Http\Controllers\dashboard\ProductController;
 use App\Http\Controllers\dashboard\StaffController;
+use App\Http\Controllers\dashboard\StatusController;
 use App\Http\Controllers\dashboard\StipeController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,4 +82,7 @@ Route::controller(StipeController::class)->group(function () {
     Route::post('pay/{id}', 'pay');
     Route::post('webhook', 'webhook');
     Route::get('testmail', 'testmail');
+});
+Route::prefix('status')->middleware(['auth:sanctum'])->group(function () {
+    Route::get('get', [StatusController::class, 'listing']);
 });

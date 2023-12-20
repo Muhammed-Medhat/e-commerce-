@@ -15,7 +15,10 @@ class StipeController extends Controller
 {
     public $stripe;
 
-    public function __construct() {$this->stripe = Cashier::stripe();}
+    public function __construct() {
+        $this->stripe = Cashier::stripe();
+        $this->middleware(['auth:sanctum'],['only' =>['pay']]);
+    }
 
     function pay($id) {
         try {
