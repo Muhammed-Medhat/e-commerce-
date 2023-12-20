@@ -83,6 +83,7 @@ Route::controller(StipeController::class)->group(function () {
     Route::post('webhook', 'webhook');
     Route::get('testmail', 'testmail');
 });
-Route::prefix('status')->middleware(['auth:sanctum'])->group(function () {
+
+Route::prefix('statics')->middleware(['auth:sanctum'])->group(function () {
     Route::get('get', [StatusController::class, 'listing']);
 });
