@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\dashboard;
 
+use App\Exports\ProductsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateProductRequest;
 use App\Http\Requests\UpdateProductRequest;
@@ -16,6 +17,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Excel;
 
 class ProductController extends Controller
 {
@@ -264,5 +266,35 @@ class ProductController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function export_products(Excel $excel , Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => ['array'],
+                'id.*' => ['exists:products,id'],
+            ]);
+            /// valid error message //
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validator->errors()
+                ], 401);
+            }
+    
+            if ($request->id) {
+                return $excel->download(new ProductsExport($request->id), 'products.xlsx');
+            }else {
+                return $excel->download(new ProductsExport(), 'products.xlsx');
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+
     }
 }

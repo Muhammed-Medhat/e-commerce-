@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\dashboard;
 
+use App\Exports\CustomersExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Excel;
 
 class CustomerController extends Controller
 {
@@ -215,5 +217,35 @@ class CustomerController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function export_customers(Excel $excel , Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => ['array'],
+                'id.*' => ['exists:users,id'],
+            ]);
+            /// valid error message //
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validator->errors()
+                ], 401);
+            }
+    
+            if ($request->id) {
+                return $excel->download(new CustomersExport($request->id), 'customers.xlsx');
+            }else {
+                return $excel->download(new CustomersExport(), 'customers.xlsx');
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+
     }
 }

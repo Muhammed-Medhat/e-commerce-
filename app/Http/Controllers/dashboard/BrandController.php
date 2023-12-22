@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\dashboard;
 
+use App\Exports\BrandsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateBrandRequest;
 use App\Http\Requests\UpdateBrandRequest;
@@ -12,6 +13,7 @@ use App\Traits\UploadBese64Image;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Excel;
 
 class BrandController extends Controller
 {
@@ -203,5 +205,35 @@ class BrandController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function export_brands(Excel $excel , Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => ['array'],
+                'id.*' => ['exists:brands,id'],
+            ]);
+            /// valid error message //
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validator->errors()
+                ], 401);
+            }
+    
+            if ($request->id) {
+                return $excel->download(new BrandsExport($request->id), 'brands.xlsx');
+            }else {
+                return $excel->download(new BrandsExport(), 'brands.xlsx');
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\dashboard;
 
+use App\Exports\CategoriesExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Excel;
 
 class CategoryController extends Controller
 {
@@ -213,5 +215,35 @@ class CategoryController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function export_categories(Excel $excel , Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => ['array'],
+                'id.*' => ['exists:categories,id'],
+            ]);
+            /// valid error message //
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validator->errors()
+                ], 401);
+            }
+    
+            if ($request->id) {
+                return $excel->download(new CategoriesExport($request->id), 'category.xlsx');
+            }else {
+                return $excel->download(new CategoriesExport(), 'category.xlsx');
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+
     }
 }

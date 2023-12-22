@@ -4,6 +4,7 @@
 */
 namespace App\Http\Controllers\dashboard;
 
+use App\Exports\StaffsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
@@ -11,6 +12,9 @@ use App\Models\User;
 use App\Traits\DeleteBase64Image;
 use App\Traits\UploadBese64Image;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Excel;
 
 class StaffController extends Controller
 {
@@ -211,5 +215,35 @@ class StaffController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function export_staff(Excel $excel , Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => ['array'],
+                'id.*' => ['exists:users,id'],
+            ]);
+            /// valid error message //
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validator->errors()
+                ], 401);
+            }
+    
+            if ($request->id) {
+                return $excel->download(new StaffsExport($request->id), 'staff.xlsx');
+            }else {
+                return $excel->download(new StaffsExport(), 'staff.xlsx');
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+
     }
 }

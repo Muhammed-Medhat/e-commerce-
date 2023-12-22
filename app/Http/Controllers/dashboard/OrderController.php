@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\dashboard;
 
+use App\Exports\OrdersExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
@@ -14,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Excel;
 
 class OrderController extends Controller
 {
@@ -298,6 +300,37 @@ class OrderController extends Controller
             $order->products_order()->delete();
             return response()->json(['message'=>'order has been deleted','status'=>true]);
 
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+
+    }
+
+    public function export_orders(Excel $excel , Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => ['array'],
+                'id.*' => ['exists:orders,id'],
+                'status'=>[Rule::in(['paid', 'unpaid'])],
+            ]);
+            /// valid error message //
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validator->errors()
+                ], 401);
+            }
+    
+            if ($request->id) {
+                return $excel->download(new OrdersExport($request->id ,$request->status), 'orders.xlsx');
+            }else {
+                return $excel->download(new OrdersExport(null, $request->status), 'orders.xlsx');
+            }
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
