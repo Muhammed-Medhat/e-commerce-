@@ -81,6 +81,7 @@ class ProductController extends Controller
                     'filter_by_brand' => ['json'],
                     'filter_by_categories' => ['json'],
                     'filter_by_date_range' => ['json'],
+                    'sort_by_ratings' => [Rule::in(["low-to-high", "high-to-low"])],
                 ]);
     
                 // valid error message
@@ -158,6 +159,16 @@ class ProductController extends Controller
                 // Filter by price high-to-low
                 if (isset($request->sort_by) && $request->sort_by == "high-to-low") {
                     $products->orderBy('price','desc');
+                }
+
+                // sort_by_ratings high-to-low
+                if (isset($request->sort_by_ratings) && $request->sort_by_ratings == "high-to-low") {
+                    $products->withAvg('reviews', 'value')->orderBy('reviews_avg_value', 'desc');
+                }
+
+                // sort_by_ratings low-to-high
+                if (isset($request->sort_by_ratings) && $request->sort_by_ratings == "low-to-high") {
+                    $products->withAvg('reviews', 'value')->orderBy('reviews_avg_value', 'asc');
                 }
         
             return response()->json(['data'=>$products->paginate(), 'status'=>true]);
